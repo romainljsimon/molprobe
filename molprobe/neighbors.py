@@ -7,13 +7,8 @@ def create_neigbors(positions, skin, length_box):
     _, ind = grid.bubble_neighbors(positions, distance_upper_bound=skin)
     out = []
     for i, elt in enumerate(ind):
-        #ind = i - i%3
-        mol_ind = np.array([i]) #, i+1, i+2])
-        #print(elt)
-        #print(np.setxor1d(elt, mol_ind))
-        #print(np.intersect1d(elt, np.setxor1d(elt, mol_ind)))
-        out.append(np.intersect1d(elt, np.setxor1d(elt, mol_ind)))
-        
+        mol_ind = np.array([i])
+        out.append(np.intersect1d(elt, np.setxor1d(elt, mol_ind)))  
     return out
 
 def common_neighbors(neigh1, neigh2):

@@ -1,12 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import scipy
 import scipy.optimize
-import util.extrapol_functions as ex
-import plot.colors as col
+import extrapol as ex
+import colors as col
 import glob
 import re
-from scipy import fft   
 import pyfftlog
 
 natsort = lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split('(\d+)', s)]
