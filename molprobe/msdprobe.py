@@ -103,5 +103,38 @@ class MSDFolder:
             ax.plot(msd[:, 0], msd[:, 1], label=temp)
         ax.legend()
         ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_xlabel('time')
+        ax.set_ylabel('MSD')
+
+    def plot_msd_div(self, ax, diff_array):
+        """
+        Plot Mean Squared Displacement (MSD) data normalized by the factor 6*D*t on a given matplotlib axis.
+
+        The function plots MSD data for each temperature, dividing by \(6 \cdot D \cdot t\), where \(D\) 
+        is the diffusion coefficient from `diff_array` and \(t\) is time. At long times, if the diffusion 
+        coefficient \(D\) is accurate, the plotted values should converge to 1, indicating correct 
+        diffusion scaling.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            The axis object on which the normalized MSD data will be plotted.
+        diff_array : 2d numpy arrau
+            An array where each line is: (temperature, diffusion coefficient), used for scaling MSD data.
+
+        Notes
+        -----
+        For each dataset in `msd_array`, the temperature from `temp_array` is matched with the diffusion 
+        coefficient in `diff_array` to perform normalization. The plot is labeled with temperature values 
+        and uses a logarithmic scale for both x and y axes.
+    """
+        for msd, temp, diff in zip(self.msd_array, self.temp_array, diff_array):
+            if temp == diff[0]:
+                div = 6 * msd[:, 0] * diff[1]
+                ax.plot(msd[:, 0], msd[:, 1] / div, label=temp)
+        ax.legend()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
         ax.set_xlabel('time')
         ax.set_ylabel('MSD')
