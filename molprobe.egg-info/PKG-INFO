@@ -1,0 +1,18 @@
+Metadata-Version: 2.1
+Name: molprobe
+Version: 0.1.0
+Summary: A Python package for analysing molecular trajectories
+Author-email: Romain Simon <romainljsimon@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/romainljsimon/molprobe.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: atooms
+Requires-Dist: scipy
+Requires-Dist: atooms-pp==3.3.3
+
+# molprobe

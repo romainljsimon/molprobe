@@ -9,7 +9,7 @@ description = "A Python package for analysing molecular trajectories"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Romain Simon", email = "romainljsimon@gmail.com},
+    {name = "Romain Simon", email = "romainljsimon@gmail.com"},
 ]
 requires-python = ">=3.6"
 classifiers = [
@@ -18,8 +18,11 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-
+    "numpy",
+    "atooms",
+    "scipy",
+    "atooms-pp==3.3.3"
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/my_package"  # Replace with your repository URL
+Homepage = "https://github.com/romainljsimon/molprobe.com"

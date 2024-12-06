@@ -1,0 +1,4 @@
+numpy
+atooms
+scipy
+atooms-pp==3.3.3

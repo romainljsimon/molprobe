@@ -7,3 +7,6 @@ def func_parab( x, ln_a, b, c):
 def func_high_temp(x, ln_tau0, ene_0):
     #x is the inverse of temperature
     return ln_tau0 + ene_0 * x
+
+def linear(x, a, b):
+    return a*x + b

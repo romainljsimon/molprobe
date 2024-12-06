@@ -1,18 +1,19 @@
 import numpy as np
 import scipy
 import scipy.optimize
-import extrapol as ex
-import colors as col
+import molprobe.fit_functions as ex
+import molprobe.colors as col
 import glob
 import re
 import pyfftlog
+import os
 
 natsort = lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split('(\d+)', s)]
 
 class TauFile:
     def __init__(self, path_tau='', legend='', onset_time=1,  start=0, end=0, rescale_temp=1,
                  tg_parab=None, onset_temp=None, extrapolation=False, tts=0, marker='s', ms=5, 
-                 color='b', inverse_temp=True):
+                 color='b', inverse_temp=True, inverse_y=False):
         self.path_tau = path_tau
         self.legend = legend
         self.onset_time = onset_time
@@ -27,6 +28,7 @@ class TauFile:
         self.rescale_temp = rescale_temp
         self.onset_temp = onset_temp
         self.inverse_temp = inverse_temp
+        self.inverse_y = inverse_y
         self.prepare_file()
         self.tg_parab = tg_parab
         self.t_extrapol_parab, self.temp_extrapol_parab = [], []
@@ -35,7 +37,10 @@ class TauFile:
             self.calculate_extrapolation()
 
     def prepare_file(self):
-        data = np.genfromtxt(self.path_tau)
+        if os.path.splitext(self.path_tau)[1] == '.csv':
+            data = np.genfromtxt(self.path_tau, delimiter=',')
+        else:
+            data = np.genfromtxt(self.path_tau)
         mask = np.any(np.isnan(data), axis=1)
         data = data[~mask]
         if self.inverse_temp:
@@ -52,9 +57,11 @@ class TauFile:
             self.temp_array = data[self.start:self.end , 0]
         self.temp_array /= self.rescale_temp
         self.t_array = data[self.start:self.end , 1] / self.onset_time
+        if self.inverse_y:
+            self.t_array = 1 / self.t_array
     
     def calculate_extrapolation(self):
-        mask = self.t_array > 1e2
+        mask = self.t_array > 1
         temp_array_fit_parab, relaxation_array_fit_parab = self.temp_array[mask], self.t_array[mask] 
         popt_parab, _ = scipy.optimize.curve_fit(ex.func_parab, temp_array_fit_parab, 
                                                       np.log(relaxation_array_fit_parab), 
@@ -79,6 +86,7 @@ class TauFile:
             ax.plot(1 / self.temp_array[self.tts:], self.t_array[self.tts:], marker='s', markerfacecolor='none', 
                     markersize=self.ms, markeredgecolor=col.adjust_lightness('blue'), label='TTS')
         ax.set_xlabel(r'$1/ T$')
+        ax.set_yscale('log')
         ax.set_ylabel(r'$\tau / \tau_o$')
 
     def calculate_activation_energy(self):
@@ -160,7 +168,7 @@ class CorrFolder:
         self.prepare_folder()
     
     def prepare_folder(self):
-        path_files = f'{self.path_folder}/*cov*{self.corr}*'
+        path_files = f'{self.path_folder}/*autocorr*{self.corr}*'
         file_list = np.array(sorted(glob.glob(path_files), key=natsort))[::-1]
         file_list = np.array([elt for elt in file_list if '.png' not in elt])
         file_list = file_list[self.start: len(file_list) - self.end]
@@ -169,8 +177,29 @@ class CorrFolder:
             elt_array = np.genfromtxt(elt)
             elt_array[:, 0] /= self.onset_time
             self.corr_array.append(elt_array)
-        self.corr_array = np.array(self.corr_array)
+        #self.corr_array = np.array(self.corr_array)
 
+    def extract_tau(self, filename):
+        """
+        Find first root of f=f(x) for data sets.
+
+        Given two lists x and f, it returns the value of xstar for which
+        f(xstar) = fstar. Raises an ValueError if no root is found.
+        """
+        tau_array = []
+        fstar = np.exp(-1)
+        for j, corr in enumerate(self.corr_array):
+            s = corr[0, 1] - fstar
+            for i in range(len(corr)):
+                if (corr[i, 1] - fstar) * s < 0.0:
+                    # Linear interpolation
+                    dxf = (corr[i, 1] - corr[i-1, 1]) / (corr[i, 0] - corr[i-1, 0])
+                    
+                    xstar = corr[i-1, 0] + (fstar - corr[i-1, 1]) / dxf
+                    tau_array.append([1./self.temp_array[j], xstar])
+                    break
+        # We get to the end and cannot find the root
+        np.savetxt(filename, np.array(tau_array))
 
     def compute_chi_fftlog(self, logt, c_t):
         n=len(logt)

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy
 import scipy.optimize
-import extrapol as ex
+import molprobe.fit_functions as ex
 import colors as col
 
 

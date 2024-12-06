@@ -1,11 +1,11 @@
 import numpy as np
 import scipy
 import scipy.optimize
-import extrapol as ex
-import colors as col
+import molprobe.fit_functions as fit
+import molprobe.colors as col
 import glob
 import re
-import pyfftlog
+import os 
 
 natsort = lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split('(\d+)', s)]
 
@@ -75,17 +75,33 @@ class MSDFolder:
         FileNotFoundError
             If no files matching the pattern are found in the specified folder.
         """
-        path_files = f'{self.path_folder}/*{self.msd}*msd**'
+        path_files = f'{self.path_folder}/{self.msd}*msd*'
         file_list = np.array(sorted(glob.glob(path_files), key=natsort))[::-1]
         file_list = np.array([elt for elt in file_list if '.png' not in elt])
+        file_list = np.array([elt for elt in file_list if '.py' not in elt])
         file_list = file_list[self.start: len(file_list) - self.end]
+        print(file_list)
         self.temp_array = np.array([float(re.findall(r"[-+]?(?:\d*\.*\d+)", s)[-1]) for s in file_list])
-        for elt in file_list:
+        idx = np.argsort(self.temp_array)[::-1]
+        self.temp_array, file_list = self.temp_array[idx], file_list[idx]
+        
+        for i, elt in enumerate(file_list):
             elt_array = np.genfromtxt(elt)
-            elt_array[:, 0] /= self.onset_time
+            elt_array[:, 0] /= self.onset_time[i]
             self.msd_array.append(elt_array)
-        self.msd_array = np.array(self.msd_array)
-            
+        #self.msd_array = np.array(self.msd_array)
+
+    def calc_diff(self, filename='diff.txt'):
+        diff_array = []
+        for temp, t_msd in zip(self.temp_array, self.msd_array):
+            t = t_msd[:, 0]
+            msd = t_msd[:, 1]
+            popt, _ = scipy.optimize.curve_fit(fit.linear, t[-5:], msd[-5:], bounds=([0,0],[np.inf, np.inf]))
+            diff_coeff = popt[0] / 6
+            diff_array.append([1 / temp, diff_coeff])
+        diff_array = np.array(diff_array)
+        np.savetxt(os.path.join(self.path_folder, filename), diff_array)
+
     def plot_msd(self, ax):
         """
         Plots the Mean Squared Displacement (MSD) data on a given matplotlib axis.
@@ -128,9 +144,10 @@ class MSDFolder:
         For each dataset in `msd_array`, the temperature from `temp_array` is matched with the diffusion 
         coefficient in `diff_array` to perform normalization. The plot is labeled with temperature values 
         and uses a logarithmic scale for both x and y axes.
-    """
+        """
         for msd, temp, diff in zip(self.msd_array, self.temp_array, diff_array):
-            if temp == diff[0]:
+            if np.isclose(temp, 1 / diff[0]):
+
                 div = 6 * msd[:, 0] * diff[1]
                 ax.plot(msd[:, 0], msd[:, 1] / div, label=temp)
         ax.legend()
