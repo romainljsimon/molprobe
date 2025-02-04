@@ -5,6 +5,7 @@ molprobe/autocorrelation.py
 molprobe/calc_c2.py
 molprobe/colors.py
 molprobe/concatenate.py
+molprobe/correlation.py
 molprobe/corrprobe.py
 molprobe/file.py
 molprobe/fit_functions.py
