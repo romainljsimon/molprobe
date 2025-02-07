@@ -1,0 +1,6 @@
+.DS_Store
+test/
+env/
+molprobe/__py__cache/
+molprobe/molprobe.egg-info/
+build/
