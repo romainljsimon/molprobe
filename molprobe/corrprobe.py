@@ -63,14 +63,14 @@ class TauFile:
     def calculate_extrapolation(self):
         mask = self.t_array > 1
         temp_array_fit_parab, relaxation_array_fit_parab = self.temp_array[mask], self.t_array[mask] 
-        popt_parab, _ = scipy.optimize.curve_fit(ex.func_parab, temp_array_fit_parab, 
+        self.popt_parab, _ = scipy.optimize.curve_fit(ex.func_parab, temp_array_fit_parab, 
                                                       np.log(relaxation_array_fit_parab), 
                                                       bounds=([0, 0, 0], [np.inf, np.inf, np.inf]))
-        f_parab = lambda x: ex.func_parab(x, *popt_parab) - np.log(10**12)
+        f_parab = lambda x: ex.func_parab(x, *self.popt_parab) - np.log(10**12)
         #self.tg_parab = scipy.optimize.root(f_parab , 1/np.array([0.8])).x[0]
         self.tg_parab = scipy.optimize.brentq(f_parab, 0.01, np.max(self.temp_array))
         self.temp_extrapol_parab = np.linspace(self.tg_parab, np.max(self.temp_array))
-        self.t_extrapol_parab = np.exp(ex.func_parab(self.temp_extrapol_parab, *popt_parab))
+        self.t_extrapol_parab = np.exp(ex.func_parab(self.temp_extrapol_parab, *self.popt_parab))
 
         
 
