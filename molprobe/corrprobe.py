@@ -168,7 +168,7 @@ class CorrFolder:
         self.prepare_folder()
     
     def prepare_folder(self):
-        path_files = f'{self.path_folder}/*autocorr*{self.corr}*'
+        path_files = f'{self.path_folder}/{self.corr}*'
         file_list = np.array(sorted(glob.glob(path_files), key=natsort))[::-1]
         file_list = np.array([elt for elt in file_list if '.png' not in elt])
         file_list = file_list[self.start: len(file_list) - self.end]
@@ -179,7 +179,7 @@ class CorrFolder:
             self.corr_array.append(elt_array)
         #self.corr_array = np.array(self.corr_array)
 
-    def extract_tau(self, filename):
+    def extract_tau(self, filename, fstar=np.exp(-1)):
         """
         Find first root of f=f(x) for data sets.
 
@@ -187,7 +187,6 @@ class CorrFolder:
         f(xstar) = fstar. Raises an ValueError if no root is found.
         """
         tau_array = []
-        fstar = np.exp(-1)
         for j, corr in enumerate(self.corr_array):
             s = corr[0, 1] - fstar
             for i in range(len(corr)):
