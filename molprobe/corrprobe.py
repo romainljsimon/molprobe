@@ -74,14 +74,16 @@ class TauFile:
 
         
 
-    def plot_tau(self, ax):
+    def plot_tau(self, ax, color, markeredgecolor=None):
         if self.extrapolation:    
             x_array = 1 / self.temp_extrapol_parab
             ax.plot([1/self.tg_parab, 1/self.tg_parab], [1e-2, 1e12], '--', color=self.color)
             ax.plot(x_array, self.t_extrapol_parab, color=self.color, label='Parabolic Extrapolation')
         
-        ax.plot(1 / self.temp_array[:self.tts], self.t_array[:self.tts], marker=self.marker, ms=self.ms, color=self.color,  
-                 markeredgecolor=col.adjust_lightness(self.color), label=self.legend)
+        if markeredgecolor is None:
+            markeredgecolor = col.adjust_lightness(self.color)
+        ax.plot(1 / self.temp_array[:self.tts], self.t_array[:self.tts], marker=self.marker, ms=self.ms, color=color,  
+                 markeredgecolor=markeredgecolor, label=self.legend)
         if self.tts < len(self.temp_array):
             ax.plot(1 / self.temp_array[self.tts:], self.t_array[self.tts:], marker='s', markerfacecolor='none', 
                     markersize=self.ms, markeredgecolor=col.adjust_lightness('blue'), label='TTS')
