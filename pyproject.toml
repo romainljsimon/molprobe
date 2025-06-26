@@ -3,7 +3,7 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "molprobe"  # Replace with your package name
+name = "molprobe"
 version = "0.1.0"
 description = "A Python package for analysing molecular trajectories"
 readme = "README.md"
@@ -21,7 +21,8 @@ dependencies = [
     "numpy",
     "atooms",
     "scipy",
-    "atooms-pp==3.3.3"
+    "atooms-pp",
+    "pyfftlog"
 ]
 
 [project.urls]
