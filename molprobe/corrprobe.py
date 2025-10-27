@@ -69,7 +69,7 @@ class TauFile:
         f_parab = lambda x: ex.func_parab(x, *self.popt_parab) - np.log(10**12)
         #self.tg_parab = scipy.optimize.root(f_parab , 1/np.array([0.8])).x[0]
         self.tg_parab = scipy.optimize.brentq(f_parab, 0.01, np.max(self.temp_array))
-        self.temp_extrapol_parab = np.linspace(self.tg_parab, np.max(self.temp_array))
+        self.temp_extrapol_parab = np.linspace(self.tg_parab, np.max(self.temp_array), num=200)
         self.t_extrapol_parab = np.exp(ex.func_parab(self.temp_extrapol_parab, *self.popt_parab))
 
         
@@ -77,8 +77,8 @@ class TauFile:
     def plot_tau(self, ax, color=None, markerfacecolor=None, markeredgecolor=None):
         if self.extrapolation:    
             x_array = 1 / self.temp_extrapol_parab
-            ax.plot([1/self.tg_parab, 1/self.tg_parab], [1e-2, 1e12], '--', color=self.color)
-            ax.plot(x_array, self.t_extrapol_parab, color=self.color, label='Parabolic Extrapolation')
+            ax.plot([1/self.tg_parab, 1/self.tg_parab], [1e-2, 1e12], '--', color="black")
+            ax.plot(x_array, self.t_extrapol_parab, '--', color=self.color,  label='Parabolic Extrapolation')
         
         if color is None:
             color = self.color
@@ -238,10 +238,25 @@ class CorrFolder:
             break
         self.fht_array = np.array(self.fht_array)
             
-    def plot_corr(self, ax):
-        for corr, temp in zip(self.corr_array, self.temp_array):
-            ax.plot(corr[:, 0], corr[:, 1], label=temp)
-        ax.legend()
+    def plot_corr(self, ax, colors=None, markerfacecolors=None, markeredgecolors=None, legend=True, temps=None, ms=5, marker='s'):
+        if temps is None:
+            temps = self.temp_array
+            corr_array = self.corr_array
+        else:
+            indices = [np.where(self.temp_array == temp)[0][0] for temp in temps]
+            temps= self.temp_array[indices]
+            corr_array = [self.corr_array[i] for i in indices]
+        if colors is None:
+            colors = col.get_rb(1./temps, inverse=True).to_rgba(1./temps)
+        if markerfacecolors is None:
+            markerfacecolors = colors
+        if markeredgecolors is None:
+            markeredgecolors = colors
+        for i, (corr, temp) in enumerate(zip(corr_array, temps)):
+            ax.plot(corr[:, 0], corr[:, 1], label=temp, color=colors[i], marker=marker, ms=ms,
+                    markerfacecolor=markerfacecolors[i], markeredgecolor=markeredgecolors[i])
+        if legend:
+            ax.legend(frameon=False)
         ax.set_xscale('log')
     
     def plot_fft(self, ax):
