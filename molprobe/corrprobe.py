@@ -13,7 +13,7 @@ natsort = lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split('(\d
 class TauFile:
     def __init__(self, path_tau='', legend='', onset_time=1,  start=0, end=0, rescale_temp=1,
                  tg_parab=None, onset_temp=None, extrapolation=False, tts=0, marker='s', ms=5, 
-                 color='b', inverse_temp=True, inverse_y=False):
+                 color='b', inverse_temp=True, inverse_y=False, tcond=1.0):
         self.path_tau = path_tau
         self.legend = legend
         self.onset_time = onset_time
@@ -34,7 +34,7 @@ class TauFile:
         self.t_extrapol_parab, self.temp_extrapol_parab = [], []
         self.activation_energy = []
         if extrapolation:
-            self.calculate_extrapolation()
+            self.calculate_extrapolation(tcond=tcond)
 
     def prepare_file(self):
         if os.path.splitext(self.path_tau)[1] == '.csv':
