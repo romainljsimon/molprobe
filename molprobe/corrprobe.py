@@ -60,8 +60,8 @@ class TauFile:
         if self.inverse_y:
             self.t_array = 1 / self.t_array
     
-    def calculate_extrapolation(self):
-        mask = self.t_array > 1
+    def calculate_extrapolation(self, tcond=1.0):
+        mask = self.t_array > tcond
         temp_array_fit_parab, relaxation_array_fit_parab = self.temp_array[mask], self.t_array[mask] 
         self.popt_parab, _ = scipy.optimize.curve_fit(ex.func_parab, temp_array_fit_parab, 
                                                       np.log(relaxation_array_fit_parab), 
